@@ -1,13 +1,12 @@
 <?php
 return [
-    'listen_ip'     => env('LARAVELS_LISTEN_IP', '0.0.0.0'),
-    'listen_port'   => env('LARAVELS_LISTEN_PORT', 5200),
-    'enable_gzip'   => env('LARAVELS_ENABLE_GZIP', false),
-    'server'        => env('LARAVELS_SERVER', 'LaravelS'),
- //   'handle_static' => env('LARAVELS_HANDLE_STATIC', false),
+    'listen_ip'     => env('LARAVELS_SOCKET_LISTEN_IP', '0.0.0.0'),
+    'listen_port'   => env('LARAVELS_SOCKET_LISTEN_PORT', 5200),
+    'enable_gzip'   => env('LARAVELS_SOCKET_ENABLE_GZIP', false),
+    'server'        => env('LARAVELS_SOCKET_SERVER', 'laravels-http'),
     'swoole'        => [
         'dispatch_mode' => 2,
-        'max_request'   => 3000,
+        'max_request'   => 5000,
         'daemonize'     => 1,
         'pid_file'      => storage_path('laravelsWebsocket.pid'),
         'log_file'      => storage_path('logs/swoole-' . date('Y-m-d') . '.log'),
