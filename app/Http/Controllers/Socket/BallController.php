@@ -10,6 +10,7 @@ use App\Services\Ball\MoveService;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class BallController extends Controller
 {
@@ -67,6 +68,8 @@ class BallController extends Controller
             'type' => 'start',
             'user' => $users,
         ];
+
+        file_put_contents(storage_path() . '/test', var_export($return));
         app('webSocket')->send($return);
     }
 

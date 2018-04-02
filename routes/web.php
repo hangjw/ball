@@ -12,7 +12,12 @@
 */
 
 Route::get('/', function () {
+    \Illuminate\Support\Facades\Cache::put('a', 1);
+    $a = \Illuminate\Support\Facades\Cache::get('a');
+    \Illuminate\Support\Facades\Log::info($a);
     return view('ball/index');
 });
 
+
+Route::get('/test', 'TestController@test');
 

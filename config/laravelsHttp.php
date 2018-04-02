@@ -8,7 +8,7 @@ return [
     'swoole'        => [
         'dispatch_mode' => 2,
         'max_request'   => 5000,
-        'worker_num'    => 30,
+        'worker_num'    => 5,
         'daemonize'     => 1,
         'pid_file'      => storage_path('laravels.pid'),
         'log_file'      => storage_path('logs/swoole-' . date('Y-m-d') . '.log'),
