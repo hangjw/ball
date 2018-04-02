@@ -24,7 +24,7 @@
             alert("您的浏览器不支持 WebSocket!");
         }
         var name;
-        var app_url = "<?php echo request()->server('HTTP_HOST'); ?>";
+        var app_url = "<?php echo request()->getHost(); ?>";
         var ws = new WebSocket("ws://" + app_url + ":5200/api/socket/ball");
         ws.onopen = function () {
         };
