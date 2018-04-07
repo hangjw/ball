@@ -3,8 +3,8 @@
     <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
 
     <style>
-        .userBall{
-            position:absolute;
+        .userBall {
+            position: absolute;
             border-radius: 50%;
             border: 1px solid red;
         }
@@ -12,8 +12,10 @@
 </head>
 
 <body>
-<div id="map" style="position:relative;margin:auto;width:1000px;height:600px;border: 1px solid red">
-</div>
+<video id="video" width="480" height="320" controls>
+
+    <div id="map" style="position:relative;margin:auto;width:1000px;height:600px;border: 1px solid red">
+    </div>
 </body>
 <script>
 
@@ -44,11 +46,11 @@
                     var user = data.user[i];
                     var id = user.id;
                     if ($('#' + id).length == 0) {
-                        var html = ''+
+                        var html = '' +
                             '<div class="userBall" style="left:' + user.position.x + 'px;top:' + user.position.y + 'px;width:' + user.size.width + initStyle.unit + ';height:' + user.size.height + initStyle.unit + '" id="' + id + '">' +
-                                '<span style="white-space:nowrap;">'+ user.name +'</span>' +
+                            '<span style="white-space:nowrap;">' + user.name + '</span>' +
                             '</div>' +
-                        '';
+                            '';
                         $('#map').append(html);
                     }
                 }
@@ -61,6 +63,13 @@
             } else if (data.type == 'close') {
                 var close_id = data.close_id;
                 $('#' + close_id).remove();
+            } else {
+                //如果是一个ICE的候选，则将其加入到PeerConnection中，否则设定对方的session描述为传递过来的描述
+                if (json.event === "__ice_candidate") {
+                    pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+                } else {
+                    pc.setRemoteDescription(new RTCSessionDescription(data.sdp));
+                }
             }
         };
         ws.onclose = function () {
@@ -68,10 +77,10 @@
         };
 
         while (!name) {
-            name = window.prompt("欢迎，请在此输入您的姓名。","");
+            name = window.prompt("欢迎，请在此输入您的姓名。", "");
         }
         send('/api/socket/ball/setName', {
-            'name' : name
+            'name': name
         });
 
         // 继承
@@ -123,6 +132,81 @@
             'speed': 100,  // 一秒移动的unit
             'offset': null
         };
+
+
+        //使用Google的stun服务器
+        var iceServer = {
+            "iceServers": [{
+                "url": "stun:stun.l.google.com:19302"
+            }]
+        };
+        var getUserMedia = (navigator.getUserMedia ||
+            navigator.webkitGetUserMedia ||
+            navigator.mozGetUserMedia ||
+            navigator.msGetUserMedia);
+
+        var PeerConnection = (window.PeerConnection ||
+            window.webkitPeerConnection00 ||
+            window.webkitRTCPeerConnection ||
+            window.mozRTCPeerConnection);
+        var pc = new PeerConnection(iceServer);
+        //发送ICE候选到其他客户端
+        pc.onicecandidate = function (event) {
+            alert(1);
+            alert(event.candidate);
+            ws.send(JSON.stringify({
+                "event": "__ice_candidate",
+                "data": {
+                    "candidate": event.candidate
+                }
+            }));
+        };
+        var video = document.getElementById('video');
+        ;
+        //如果检测到媒体流连接到本地，将其绑定到一个video标签上输出
+        pc.onaddstream = function (event) {
+            video.srcObject = stream;
+        };
+        getUserMedia.call(navigator, {
+            "audio": true,
+            "video": true
+        }, function (stream) {
+            //发送offer和answer的函数，发送本地session描述
+            var sendOfferFn = function (desc) {
+                    pc.setLocalDescription(desc);
+                    alert(2);
+                    alert(desc);
+                    ws.send(JSON.stringify({
+                        "event": "__offer",
+                        "data": {
+                            "sdp": desc
+                        }
+                    }));
+                },
+                sendAnswerFn = function (desc) {
+                    pc.setLocalDescription(desc);
+                    ws.send(JSON.stringify({
+                        "event": "__answer",
+                        "data": {
+                            "sdp": desc
+                        }
+                    }));
+                };
+            //绑定本地媒体流到video标签用于输出
+            video.srcObject = stream;
+//            myselfVideoElement.src = URL.createObjectURL(stream);
+            //向PeerConnection中加入需要发送的流
+            pc.addStream(stream);
+            //如果是发送方则发送一个offer信令，否则发送一个answer信令
+//            if(isCaller){
+//                pc.createOffer(sendOfferFn);
+//            } else {
+            pc.createAnswer(sendAnswerFn);
+//            }
+        }, function (error) {
+            //处理媒体流创建失败错误
+        });
+
     })
 </script>
 </html>

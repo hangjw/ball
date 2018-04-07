@@ -17,7 +17,5 @@ class TestController extends BaseController
 
     public function test()
     {
-        $return = '';
-        return $return;
     }
 }
