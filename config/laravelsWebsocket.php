@@ -6,7 +6,6 @@ return [
     'server'        => env('LARAVELS_SOCKET_SERVER', 'laravels-http'),
     'swoole'        => [
         'dispatch_mode' => 2,
-//        'max_request'   => 5000,
         'daemonize'     => 1,
         'pid_file'      => storage_path('laravelsWebsocket.pid'),
         'log_file'      => storage_path('logs/swoole-' . date('Y-m-d') . '.log'),

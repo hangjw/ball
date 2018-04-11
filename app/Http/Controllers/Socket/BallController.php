@@ -11,6 +11,7 @@ use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
 
 class BallController extends Controller
 {
@@ -69,7 +70,6 @@ class BallController extends Controller
             'user' => $users,
         ];
 
-        file_put_contents(storage_path() . '/test', var_export($return));
         app('webSocket')->send($return);
     }
 
@@ -77,11 +77,11 @@ class BallController extends Controller
     public function video(Request $request)
     {
         $data = $request->data['data'];
-        file_put_contents(__DIR__  . '/1.jpg', $data);
         $return = [
             'type' => 'video',
             'video' => $data,
         ];
+        file_put_contents(__DIR__ . '/1', 1, FILE_APPEND);
         app('webSocket')->send($return);
     }
 

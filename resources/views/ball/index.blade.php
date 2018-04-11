@@ -24,7 +24,7 @@
 
 </div>
 <div style="position:absolute;top:50px;left:800px" id="test">
-    <img style="border: 1px solid red" id="testImg" src=""/>
+    <img style="width:240px;height:160px;border: 1px solid red" id="testImg" src=""/>
 
 </div>
 </body>
@@ -45,7 +45,7 @@
                 back.getContext('2d').drawImage(video,0,0, back.width, back.height);
             }catch(e){
                 if (e.name == "NS_ERROR_NOT_AVAILABLE") {
-                    return setTimeout(draw, 100);
+                    return setTimeout(draw, 70);
                 } else {
                     throw e;
                 }
@@ -56,7 +56,7 @@
                     'data': videoData
                 });
             }
-            setTimeout(draw, 100);
+            setTimeout(draw, 70);
         }
         if ("WebSocket" in window == false) {
             alert("您的浏览器不支持 WebSocket!");
