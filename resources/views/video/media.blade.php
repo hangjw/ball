@@ -20,8 +20,6 @@
         var back = document.getElementById('output');
         var video = document.getElementById("video");
         var success = function(stream){
-            console.log(window.URL.createObjectURL(stream));
-            console.log((stream));
             video.src = window.URL.createObjectURL(stream);
         }
         navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
@@ -62,7 +60,6 @@
         ws.onmessage = function (evt) {
             var data = JSON.parse(evt.data);
             if (data.type == 'video') {
-                console.log(data.video)
                 if (data.video) {
                     $('#testImg').attr('src', data.video);
                 }
