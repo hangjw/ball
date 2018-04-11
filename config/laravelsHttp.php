@@ -1,6 +1,6 @@
 <?php
 return [
-    'listen_ip'     => env('LARAVELS_HTTP_LISTEN_IP', '127.0.0.1'),
+    'listen_ip'     => env('LARAVELS_HTTP_LISTEN_IP', '0.0.0.0'),
     'listen_port'   => env('LARAVELS_HTTP_LISTEN_PORT', 5001),
     'enable_gzip'   => env('LARAVELS_HTTP_ENABLE_GZIP', false),
     'server'        => env('LARAVELS_HTTP_SERVER', 'laravels-http'),
