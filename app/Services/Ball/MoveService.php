@@ -30,7 +30,7 @@ class MoveService
                 'moveId' => $moveId
             ];
             $ceil = $total/$speed;
-            if ($ceil) {
+            if ($ceil || empty($total)) {
                 $position = $return['moveTo'] = [
                     'x' => $moveTo['x'],
                     'y' => $moveTo['y'],

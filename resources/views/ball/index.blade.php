@@ -12,16 +12,52 @@
 </head>
 
 <body>
-<video id="video" width="480" height="320" controls>
+<div style="position:absolute">
+    <video id="video"  width="240" height="160" controls/>
+    <canvas id="output" style="display:none"></canvas>
+</div>
+<div style="position:absolute;left:400px">
+    <video id="videoCli"  width="240" height="160" controls/>
+    <canvas id="output" style="display:none"></canvas>
+</div>
+<div id="map" style="position:relative;margin:auto;width:1000px;height:600px;border: 1px solid red">
 
-    <div id="map" style="position:relative;margin:auto;width:1000px;height:600px;border: 1px solid red">
-    </div>
+</div>
+<div style="position:absolute;top:50px;left:800px" id="test">
+    <img style="border: 1px solid red" id="testImg" src=""/>
+
+</div>
 </body>
 <script>
-
-
     // socket
     $(document).ready(function () {
+        var back = document.getElementById('output');
+        var video = document.getElementById("video");
+        var success = function(stream){
+            console.log(window.URL.createObjectURL(stream));
+            console.log((stream));
+            video.src = window.URL.createObjectURL(stream);
+        }
+        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+        navigator.getUserMedia({video:true, audio:false}, success, console.log);
+        function draw(){
+            try{
+                back.getContext('2d').drawImage(video,0,0, back.width, back.height);
+            }catch(e){
+                if (e.name == "NS_ERROR_NOT_AVAILABLE") {
+                    return setTimeout(draw, 100);
+                } else {
+                    throw e;
+                }
+            }
+            if(video.src){
+                var videoData = back.toDataURL("image/jpeg", 0.5);
+                send('/api/socket/ball/video', {
+                    'data': videoData
+                });
+            }
+            setTimeout(draw, 1000);
+        }
         if ("WebSocket" in window == false) {
             alert("您的浏览器不支持 WebSocket!");
         }
@@ -29,18 +65,17 @@
         var app_url = "<?php echo request()->getHost(); ?>";
         var ws = new WebSocket("ws://" + app_url + ":5200/api/socket/ball");
         ws.onopen = function () {
+            draw();
         };
 
         function send(path, data) {
 //            '/api/socket/ball/move'
             var sendData = {'path_info': path, 'data': data};
-            console.log(JSON.stringify(sendData));
             ws.send(JSON.stringify(sendData));
         }
 
         ws.onmessage = function (evt) {
             var data = JSON.parse(evt.data);
-            console.log(evt.data);
             if (data.type == 'start') {
                 for (var i in data.user) {
                     var user = data.user[i];
@@ -63,17 +98,13 @@
             } else if (data.type == 'close') {
                 var close_id = data.close_id;
                 $('#' + close_id).remove();
-            } else {
-                //如果是一个ICE的候选，则将其加入到PeerConnection中，否则设定对方的session描述为传递过来的描述
-                if (json.event === "__ice_candidate") {
-                    pc.addIceCandidate(new RTCIceCandidate(data.candidate));
-                } else {
-                    pc.setRemoteDescription(new RTCSessionDescription(data.sdp));
-                }
+            } else if (data.type == 'video') {
+                console.log(data.video)
+                $('#testImg').attr('src', data.video);
             }
         };
         ws.onclose = function () {
-            console.log("连接已关闭...");
+//            console.log("连接已关闭...");
         };
 
         while (!name) {
@@ -132,80 +163,6 @@
             'speed': 100,  // 一秒移动的unit
             'offset': null
         };
-
-
-        //使用Google的stun服务器
-        var iceServer = {
-            "iceServers": [{
-                "url": "stun:stun.l.google.com:19302"
-            }]
-        };
-        var getUserMedia = (navigator.getUserMedia ||
-            navigator.webkitGetUserMedia ||
-            navigator.mozGetUserMedia ||
-            navigator.msGetUserMedia);
-
-        var PeerConnection = (window.PeerConnection ||
-            window.webkitPeerConnection00 ||
-            window.webkitRTCPeerConnection ||
-            window.mozRTCPeerConnection);
-        var pc = new PeerConnection(iceServer);
-        //发送ICE候选到其他客户端
-        pc.onicecandidate = function (event) {
-            alert(1);
-            alert(event.candidate);
-            ws.send(JSON.stringify({
-                "event": "__ice_candidate",
-                "data": {
-                    "candidate": event.candidate
-                }
-            }));
-        };
-        var video = document.getElementById('video');
-        ;
-        //如果检测到媒体流连接到本地，将其绑定到一个video标签上输出
-        pc.onaddstream = function (event) {
-            video.srcObject = stream;
-        };
-        getUserMedia.call(navigator, {
-            "audio": true,
-            "video": true
-        }, function (stream) {
-            //发送offer和answer的函数，发送本地session描述
-            var sendOfferFn = function (desc) {
-                    pc.setLocalDescription(desc);
-                    alert(2);
-                    alert(desc);
-                    ws.send(JSON.stringify({
-                        "event": "__offer",
-                        "data": {
-                            "sdp": desc
-                        }
-                    }));
-                },
-                sendAnswerFn = function (desc) {
-                    pc.setLocalDescription(desc);
-                    ws.send(JSON.stringify({
-                        "event": "__answer",
-                        "data": {
-                            "sdp": desc
-                        }
-                    }));
-                };
-            //绑定本地媒体流到video标签用于输出
-            video.srcObject = stream;
-//            myselfVideoElement.src = URL.createObjectURL(stream);
-            //向PeerConnection中加入需要发送的流
-            pc.addStream(stream);
-            //如果是发送方则发送一个offer信令，否则发送一个answer信令
-//            if(isCaller){
-//                pc.createOffer(sendOfferFn);
-//            } else {
-            pc.createAnswer(sendAnswerFn);
-//            }
-        }, function (error) {
-            //处理媒体流创建失败错误
-        });
 
     })
 </script>

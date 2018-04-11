@@ -19,6 +19,11 @@ Route::get('/media', function () {
     return view('ball/media');
 });
 
+Route::get('/media1', function () {
+    return view('ball/media1');
+});
+
+
 
 Route::get('/test', 'TestController@test');
 
