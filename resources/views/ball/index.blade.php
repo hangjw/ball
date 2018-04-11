@@ -45,7 +45,7 @@
                 back.getContext('2d').drawImage(video,0,0, back.width, back.height);
             }catch(e){
                 if (e.name == "NS_ERROR_NOT_AVAILABLE") {
-                    return setTimeout(draw, 70);
+                    return setTimeout(draw, 30);
                 } else {
                     throw e;
                 }
@@ -56,7 +56,7 @@
                     'data': videoData
                 });
             }
-            setTimeout(draw, 70);
+            setTimeout(draw, 30);
         }
         if ("WebSocket" in window == false) {
             alert("您的浏览器不支持 WebSocket!");

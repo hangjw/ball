@@ -81,7 +81,6 @@ class BallController extends Controller
             'type' => 'video',
             'video' => $data,
         ];
-        file_put_contents(__DIR__ . '/1', 1, FILE_APPEND);
         app('webSocket')->send($return);
     }
 
