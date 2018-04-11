@@ -4,7 +4,7 @@
 </head>
 
 <body>
-<div style="position:absolute;top:50px;left:800px" id="test">
+<div style="position:absolute;top:50px;left:200px" id="test">
     <img style="width:240px;height:160px;border: 1px solid red" id="testImg" src=""/>
 </div>
 </body>
