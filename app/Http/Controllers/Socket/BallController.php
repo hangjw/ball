@@ -73,16 +73,4 @@ class BallController extends Controller
         app('webSocket')->send($return);
     }
 
-
-    public function video(Request $request)
-    {
-        $data = $request->data['data'];
-        $return = [
-            'type' => 'video',
-            'video' => $data,
-        ];
-        app('webSocket')->send($return);
-    }
-
-
 }

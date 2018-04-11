@@ -25,6 +25,8 @@ Route::group([
     Route::any('ball/close', 'BallController@close');
     Route::any('ball/move', 'BallController@move');
     Route::any('ball/setName', 'BallController@setName');
-    Route::any('ball/video', 'BallController@video');
+
+
+    Route::any('ball/video', 'VideoController@index');
 });
 

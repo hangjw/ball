@@ -16,11 +16,11 @@ Route::get('/', function () {
 });
 
 Route::get('/media', function () {
-    return view('ball/media');
+    return view('video/media');
 });
 
 Route::get('/mediaShow', function () {
-    return view('ball/media_show');
+    return view('video/media_show');
 });
 
 Route::get('/test', 'TestController@test');
