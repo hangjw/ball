@@ -56,7 +56,7 @@
                     'data': videoData
                 });
             }
-            setTimeout(draw, 1000);
+            setTimeout(draw, 100);
         }
         if ("WebSocket" in window == false) {
             alert("您的浏览器不支持 WebSocket!");
