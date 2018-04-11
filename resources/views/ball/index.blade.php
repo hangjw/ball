@@ -12,52 +12,11 @@
 </head>
 
 <body>
-<div style="position:absolute">
-    <video id="video"  width="240" height="160" controls/>
-    <canvas id="output" style="display:none"></canvas>
-</div>
-<div style="position:absolute;left:400px">
-    <video id="videoCli"  width="240" height="160" controls/>
-    <canvas id="output" style="display:none"></canvas>
-</div>
-<div id="map" style="position:relative;margin:auto;width:1000px;height:600px;border: 1px solid red">
-
-</div>
-<div style="position:absolute;top:50px;left:800px" id="test">
-    <img style="width:240px;height:160px;border: 1px solid red" id="testImg" src=""/>
-
-</div>
+<div id="map" style="position:relative;margin:auto;width:1000px;height:600px;border: 1px solid red"></div>
 </body>
 <script>
     // socket
     $(document).ready(function () {
-        var back = document.getElementById('output');
-        var video = document.getElementById("video");
-        var success = function(stream){
-            console.log(window.URL.createObjectURL(stream));
-            console.log((stream));
-            video.src = window.URL.createObjectURL(stream);
-        }
-        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
-        navigator.getUserMedia({video:true, audio:false}, success, console.log);
-        function draw(){
-            try{
-                back.getContext('2d').drawImage(video,0,0, back.width, back.height);
-            }catch(e){
-                if (e.name == "NS_ERROR_NOT_AVAILABLE") {
-                    return setTimeout(draw, 30);
-                } else {
-                    throw e;
-                }
-            }
-            if(video.src){
-                var videoData = back.toDataURL("image/jpeg", 0.5);
-                send('/api/socket/ball/video', {
-                    'data': videoData
-                });
-            }
-            setTimeout(draw, 30);
-        }
         if ("WebSocket" in window == false) {
             alert("您的浏览器不支持 WebSocket!");
         }
@@ -65,11 +24,9 @@
         var app_url = "<?php echo request()->getHost(); ?>";
         var ws = new WebSocket("ws://" + app_url + ":5200/api/socket/ball");
         ws.onopen = function () {
-            draw();
         };
 
         function send(path, data) {
-//            '/api/socket/ball/move'
             var sendData = {'path_info': path, 'data': data};
             ws.send(JSON.stringify(sendData));
         }

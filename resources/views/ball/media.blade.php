@@ -1,65 +1,73 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>摄像头拍照</title>
+    <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
 </head>
+
 <body>
-<video id="video" width="480" height="320" controls>
-</video>
-<div>
-    <button id="capture">拍照</button>
+<div style="position:absolute">
+    <video id="video"  width="240" height="160" controls/>
+    <canvas id="output" style="display:none"></canvas>
 </div>
-<canvas id="canvas" width="480" height="320"></canvas>
+</div>
+<div style="position:absolute;top:50px;left:800px" id="test">
+    <img style="width:240px;height:160px;border: 1px solid red" id="testImg" src=""/>
+
+</div>
+</body>
 <script>
-    //访问用户媒体设备的兼容方法
-    function getUserMedia(constraints, success, error) {
-        if (navigator.mediaDevices.getUserMedia) {
-            //最新的标准API
-            navigator.mediaDevices.getUserMedia(constraints).then(success).catch(error);
-        } else if (navigator.webkitGetUserMedia) {
-            //webkit核心浏览器
-            navigator.webkitGetUserMedia(constraints,success, error)
-        } else if (navigator.mozGetUserMedia) {
-            //firfox浏览器
-            navigator.mozGetUserMedia(constraints, success, error);
-        } else if (navigator.getUserMedia) {
-            //旧版API
-            navigator.getUserMedia(constraints, success, error);
+    // socket
+    $(document).ready(function () {
+        var back = document.getElementById('output');
+        var video = document.getElementById("video");
+        var success = function(stream){
+            console.log(window.URL.createObjectURL(stream));
+            console.log((stream));
+            video.src = window.URL.createObjectURL(stream);
         }
-    }
+        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+        navigator.getUserMedia({video:true, audio:false}, success, console.log);
+        function draw(){
+            try{
+                back.getContext('2d').drawImage(video,0,0, back.width, back.height);
+            }catch(e){
+                if (e.name == "NS_ERROR_NOT_AVAILABLE") {
+                    return setTimeout(draw, 30);
+                } else {
+                    throw e;
+                }
+            }
+            if(video.src){
+                var videoData = back.toDataURL("image/jpeg", 0.5);
+                send('/api/socket/ball/video', {
+                    'data': videoData
+                });
+            }
+            setTimeout(draw, 30);
+        }
+        if ("WebSocket" in window == false) {
+            alert("您的浏览器不支持 WebSocket!");
+        }
+        var name;
+        var app_url = "<?php echo request()->getHost(); ?>";
+        var ws = new WebSocket("ws://" + app_url + ":5200/api/socket/ball");
+        ws.onopen = function () {
+            draw();
+        };
 
-    let video = document.getElementById('video');
-    let canvas = document.getElementById('canvas');
-    let context = canvas.getContext('2d');
+        function send(path, data) {
+            var sendData = {'path_info': path, 'data': data};
+            ws.send(JSON.stringify(sendData));
+        }
 
-    function success(stream) {
-        //兼容webkit核心浏览器
-        let CompatibleURL = window.URL || window.webkitURL;
-        //将视频流设置为video元素的源
-        console.log(stream);
-
-        //video.src = CompatibleURL.createObjectURL(stream);
-        video.srcObject = stream;
-        video.play();
-    }
-
-    function error(error) {
-        console.log(`访问用户媒体设备失败${error.name}, ${error.message}`);
-    }
-
-    if (navigator.mediaDevices.getUserMedia || navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia) {
-        //调用用户媒体设备, 访问摄像头
-        getUserMedia({video : {width: 480, height: 320}}, success, error);
-    } else {
-        alert('不支持访问用户媒体');
-    }
-
-    document.getElementById('capture').addEventListener('click', function () {
-        context.drawImage(video, 0, 0, 480, 320);
+        ws.onmessage = function (evt) {
+            var data = JSON.parse(evt.data);
+            if (data.type == 'video') {
+                console.log(data.video)
+                $('#testImg').attr('src', data.video);
+            }
+        };
+        ws.onclose = function () {
+        };
     })
 </script>
-</body>
 </html>

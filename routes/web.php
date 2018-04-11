@@ -19,11 +19,9 @@ Route::get('/media', function () {
     return view('ball/media');
 });
 
-Route::get('/media1', function () {
-    return view('ball/media1');
+Route::get('/mediaShow', function () {
+    return view('ball/media_show');
 });
-
-
 
 Route::get('/test', 'TestController@test');
 
